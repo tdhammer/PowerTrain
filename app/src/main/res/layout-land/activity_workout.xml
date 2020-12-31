@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".WorkoutActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/tool_bar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    <TextView
+        android:id="@+id/lblTrainerSetting"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:maxLines="2"
+        android:singleLine="false"
+        android:text="@string/trainer_setting"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toStartOf="@+id/lblWatts"
+        app:layout_constraintStart_toStartOf="@+id/btnUpLeft"
+        app:layout_constraintTop_toBottomOf="@+id/tool_bar" />
+
+    <TextView
+        android:id="@+id/lblTrainerSetting2"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:maxLines="2"
+        android:singleLine="false"
+        android:text="@string/trainer_setting2"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toStartOf="@+id/lblWatts"
+        app:layout_constraintStart_toStartOf="@+id/btnUpLeft"
+        app:layout_constraintTop_toBottomOf="@+id/lblTrainerSetting" />
+
+    <TextView
+        android:id="@+id/lblCadence"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Cadence"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="@+id/btnUpRight"
+        app:layout_constraintStart_toEndOf="@+id/lblWatts"
+        app:layout_constraintTop_toBottomOf="@+id/tool_bar" />
+
+    <TextView
+        android:id="@+id/lblSpeed"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Speed"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@+id/lblCadence"
+        app:layout_constraintTop_toBottomOf="@+id/divider2" />
+
+    <TextView
+        android:id="@+id/lblHR"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Heart Rate"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="@+id/lblTrainerSetting2"
+        app:layout_constraintTop_toBottomOf="@+id/divider" />
+
+    <TextView
+        android:id="@+id/lblWatts"
+        android:layout_width="85dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="8dp"
+        android:text="Watts"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tool_bar" />
+
+    <ImageButton
+        android:id="@+id/btnUpLeft"
+        android:layout_width="75dp"
+        android:layout_height="180dp"
+        android:layout_marginTop="8dp"
+        android:onClick="incrementTrainerLevel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tool_bar"
+        app:srcCompat="@android:drawable/arrow_up_float" />
+
+    <ImageButton
+        android:id="@+id/btnUpRight"
+        android:layout_width="75dp"
+        android:layout_height="180dp"
+        android:layout_marginTop="8dp"
+        android:onClick="incrementTrainerLevel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tool_bar"
+        app:srcCompat="@android:drawable/arrow_up_float" />
+
+    <ImageButton
+        android:id="@+id/btnDownLeft"
+        android:layout_width="75dp"
+        android:layout_height="180dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@android:drawable/arrow_down_float"
+        android:onClick="decrementTrainerLevel" />
+
+    <ImageButton
+        android:id="@+id/btnDownRight"
+        android:layout_width="75dp"
+        android:layout_height="180dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@android:drawable/arrow_down_float"
+        android:onClick="decrementTrainerLevel" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="133dp"
+        android:layout_height="3dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/divider3"
+        app:layout_constraintStart_toEndOf="@+id/btnDownLeft"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="125dp"
+        android:layout_height="3dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnDownRight"
+        app:layout_constraintStart_toEndOf="@+id/divider4"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/divider3"
+        android:layout_width="2dp"
+        android:layout_height="239dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toStartOf="@+id/lblWatts"
+        app:layout_constraintStart_toEndOf="@+id/lblTrainerSetting"
+        app:layout_constraintTop_toBottomOf="@+id/lblWatts" />
+
+    <View
+        android:id="@+id/divider4"
+        android:layout_width="2dp"
+        android:layout_height="239dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toStartOf="@+id/lblCadence"
+        app:layout_constraintStart_toEndOf="@+id/lblWatts"
+        app:layout_constraintTop_toBottomOf="@+id/lblWatts" />
+
+    <Button
+        android:id="@+id/btnStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:onClick="startRide" />
+
+    <Button
+        android:id="@+id/btnPause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pause"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:onClick="pauseRide" />
+
+    <Button
+        android:id="@+id/btnSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:onClick="saveRide" />
+
+    <Button
+        android:id="@+id/btnResume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Resm"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/divider3"
+        android:onClick="resumeRide" />
+
+    <Button
+        android:id="@+id/btnStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/divider4"
+        android:onClick="stopRide" />
+
+    <TextView
+        android:id="@+id/tvSpeed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="0.00"
+        android:textSize="60sp"
+        app:layout_constraintEnd_toEndOf="@+id/lblSpeed"
+        app:layout_constraintTop_toBottomOf="@+id/lblSpeed" />
+
+    <TextView
+        android:id="@+id/tvCadence"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="000"
+        android:textSize="60sp"
+        app:layout_constraintEnd_toEndOf="@+id/lblCadence"
+        app:layout_constraintTop_toBottomOf="@+id/lblCadence" />
+
+    <TextView
+        android:id="@+id/tvWatts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="000"
+        android:textSize="90sp"
+        app:layout_constraintEnd_toEndOf="@+id/lblWatts"
+        app:layout_constraintStart_toStartOf="@+id/lblWatts"
+        app:layout_constraintTop_toBottomOf="@+id/lblWatts" />
+
+    <TextView
+        android:id="@+id/tvTrainerLevel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textSize="50sp"
+        app:layout_constraintEnd_toEndOf="@+id/lblTrainerSetting2"
+        app:layout_constraintStart_toStartOf="@+id/lblTrainerSetting2"
+        app:layout_constraintTop_toBottomOf="@+id/lblTrainerSetting2" />
+
+    <TextView
+        android:id="@+id/tvHR"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="000"
+        android:textSize="60sp"
+        app:layout_constraintStart_toStartOf="@+id/lblHR"
+        app:layout_constraintTop_toBottomOf="@+id/lblHR" />
+
+    <TextView
+        android:id="@+id/lblSpeedUnits"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="mph"
+        app:layout_constraintEnd_toEndOf="@+id/tvSpeed"
+        app:layout_constraintTop_toBottomOf="@+id/tvSpeed" />
+
+    <TextView
+        android:id="@+id/lblCadenceUnits"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RPM"
+        app:layout_constraintEnd_toEndOf="@+id/tvCadence"
+        app:layout_constraintTop_toBottomOf="@+id/tvCadence" />
+
+    <TextView
+        android:id="@+id/lblHRUnits"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="BPM"
+        app:layout_constraintStart_toStartOf="@+id/tvHR"
+        app:layout_constraintTop_toBottomOf="@+id/tvHR" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
