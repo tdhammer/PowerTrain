@@ -8,7 +8,7 @@
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
-        android:required="false" />
+        android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -29,8 +29,23 @@
         <activity
             android:name="com.ballpein.powertrain.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-        <activity android:name="com.ballpein.powertrain.WorkoutActivity"></activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        </activity>
+        <activity android:name="com.ballpein.powertrain.WorkoutActivity">
+        </activity>
+
+        <service
+            android:description="@string/svcWorkoutDescr"
+            android:exported="false"
+            android:label="Workout Service"
+            android:name=".WorkoutService">
+        </service>
+        <service
+            android:description="@string/svcBleDescr"
+            android:exported="false"
+            android:label="BLE Service"
+            android:name=".BleService">
+        </service>
     </application>
 
 </manifest>

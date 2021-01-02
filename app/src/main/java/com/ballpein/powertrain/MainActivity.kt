@@ -23,16 +23,16 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
-// TODO :: connect HRM sensor
-// TODO :: report HRM data to workout activity
+
+// TODO !! logcat still shows app as velopower!?!? (android:authorities?)
 // TODO :: record HRM data to "file" (format?)
 // TODO :: connect Speed/Cadence sensors
 // TODO :: report Speed/Cadence data to workout activity
@@ -45,7 +45,6 @@ import androidx.core.content.ContextCompat
 // TODO :: History activity?
 
 private const val ENABLE_BLUETOOTH_REQUEST_CODE = 1
-private const val LOCATION_PERMISSION_REQUEST_CODE = 2
 
 class MainActivity : AppCompatActivity() {
 
@@ -68,6 +67,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        startService(Intent(this, WorkoutService::class.java))
+        startService(Intent(this, BleService::class.java))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -80,7 +81,7 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_settings -> {
             // User chose the "Settings" item, show the app settings UI...
-            val intent = Intent(this, SettingsActivity::class.java).apply{}
+            val intent = Intent(this, SettingsActivity::class.java).apply {}
             startActivity(intent)
             true
         }
@@ -93,9 +94,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-//        if (!bluetoothAdapter.isEnabled) {
-//            promptEnableBluetooth()
-//        }
+        if (!bluetoothAdapter.isEnabled) {
+            promptEnableBluetooth()
+        }
+        startService(Intent(this, BleService::class.java))
+        startService(Intent(this, WorkoutService::class.java))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        stopService(Intent(this, BleService::class.java))
+        stopService(Intent(this, WorkoutService::class.java))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

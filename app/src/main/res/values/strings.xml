@@ -8,4 +8,7 @@
     <string name="settings_tab_text_1">Configuration</string>
     <string name="settings_tab_text_2">Sensors</string>
     <string name="settings_tab_text_3">Upload</string>
+
+    <string name="svcWorkoutDescr">service to manage workout data</string>
+    <string name="svcBleDescr">service to manage BLE sensors</string>
 </resources>
