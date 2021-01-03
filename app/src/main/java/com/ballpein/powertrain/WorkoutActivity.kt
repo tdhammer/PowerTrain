@@ -56,17 +56,16 @@ class WorkoutActivity : AppCompatActivity() {
                 }
             }, IntentFilter(BleService.HR_RAW_BROADCAST)
         )
-        // temporary speed value
         val tvSpd = findViewById<TextView>(R.id.tvSpeed)
         LocalBroadcastManager.getInstance(this).registerReceiver(
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
                     val speed =
-                        intent.getFloatExtra(BleService.EXTRA_SPD_RAW_DATA, 0.0F)
+                        intent.getFloatExtra(WorkoutService.EXTRA_SPD_DATA, 0.0F)
                     val dec = DecimalFormat("#.00")
                     tvSpd.text = dec.format(speed)
                 }
-            }, IntentFilter(BleService.SPD_RAW_BROADCAST)
+            }, IntentFilter(WorkoutService.SPD_BROADCAST)
         )
         // temporary power value
         val tvWatts = findViewById<TextView>(R.id.tvWatts)
@@ -81,18 +80,17 @@ class WorkoutActivity : AppCompatActivity() {
                 }
             }, IntentFilter(WorkoutService.PWR_BROADCAST)
         )
-        // temporary cadence value
         val tvCadence = findViewById<TextView>(R.id.tvCadence)
         LocalBroadcastManager.getInstance(this).registerReceiver(
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context, intent: Intent) {
                     val cadence =
-                        intent.getIntExtra(BleService.EXTRA_CAD_RAW_DATA, 0)
+                        intent.getIntExtra(WorkoutService.EXTRA_CAD_DATA, 0)
 //                    val dec = DecimalFormat("000")
  //                   tvCadence.text = dec.format(cadence)
                     tvCadence.text = cadence.toString()
                 }
-            }, IntentFilter(BleService.CAD_RAW_BROADCAST)
+            }, IntentFilter(WorkoutService.CAD_BROADCAST)
         )
     }
 

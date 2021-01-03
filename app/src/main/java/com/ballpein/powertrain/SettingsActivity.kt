@@ -39,6 +39,7 @@ import com.ballpein.powertrain.ui.main.SettingsPagerAdapter
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 2
 
+// TODO -- currently always scanning on app start (BleService); need to scan & save!
 class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,7 +111,7 @@ class SettingsActivity : AppCompatActivity() {
                 scanResults.add(result)
             }
             // TODO :: scan for fixed time? until all three sensors found? other?
-            stopBleScan()
+//            stopBleScan()
         }
 
         override fun onScanFailed(errorCode: Int) {
@@ -134,14 +135,14 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     fun startBleScan() {
-        requestLocationPermission()
-        bleScanner.startScan(null, scanSettings, scanCallback)
-        isScanning = true
+//        requestLocationPermission()
+//        bleScanner.startScan(null, scanSettings, scanCallback)
+//        isScanning = true
     }
 
     private fun stopBleScan() {
-        bleScanner.stopScan(scanCallback)
-        isScanning = false
+//        bleScanner.stopScan(scanCallback)
+//        isScanning = false
     }
 
     // TODO :: need to "exit" settings and reenter to get scan to run?!?!

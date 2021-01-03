@@ -17,6 +17,8 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import java.util.*
 
 
+// TODO !! ACCESS_FINE_LOCATION permission (if not set silent failure?!?!)
+// TODO :: recover connection/data stream when lost?!?!
 class BleService : Service() {
     private val TAG = "BleService"
 
@@ -35,6 +37,7 @@ class BleService : Service() {
         val EXTRA_SPD_RAW_DATA: String = "SpeedRawData"
         val CAD_RAW_BROADCAST: String = BleService::class.java.getName() + "CadenceRaw"
         val EXTRA_CAD_RAW_DATA: String = "CadenceRawData"
+        val EXTRA_TIME_RAW_DATA: String = "TimeRawData"
     }
 
     override fun onCreate() {
@@ -49,12 +52,12 @@ class BleService : Service() {
         connectSensors()
 
         // TODO :: remove temporary methods to do a send data
-        spdHandler = android.os.Handler()
-        spdRunnable = Runnable { showRandomSpeed() }
-        spdHandler.postDelayed(spdRunnable, 4250)
-        cadHandler = android.os.Handler()
-        cadRunnable = Runnable { showRandomCadence() }
-        cadHandler.postDelayed(cadRunnable, 1250)
+//        spdHandler = android.os.Handler()
+//        spdRunnable = Runnable { showRandomSpeed() }
+//        spdHandler.postDelayed(spdRunnable, 4250)
+//        cadHandler = android.os.Handler()
+//        cadRunnable = Runnable { showRandomCadence() }
+//        cadHandler.postDelayed(cadRunnable, 1250)
 
         Log.i(TAG, "Service running")
         return Service.START_STICKY
@@ -74,6 +77,7 @@ class BleService : Service() {
 
     private fun connectSensors(){
         // if sensors are configured...
+        // TODO :: do scan in settings and save info so just a connect here!
         startBleScan() // not necessary if sensors are configured?
         // start also connects...
     }
@@ -110,8 +114,21 @@ class BleService : Service() {
      *******************************************/
     // Bluetooth Base UUID = 00000000-0000-1000-8000-00805F9B34FB
     // Bluetooth LE Heart Rate Service UUID = 180D
+    //              HR Measurement Char UUID = 2A37
     private val HEARTRATE_SERVICE_UUID = "0000180D-0000-1000-8000-00805F9B34FB"
+    private val UUID_HEARTRATE_SERVICE = UUID.fromString(HEARTRATE_SERVICE_UUID)
+    private val HEARTRATE_CHAR_UUID = "00002A37-0000-1000-8000-00805F9B34FB"
+    private val UUID_HEARTRATE_CHAR = UUID.fromString(HEARTRATE_CHAR_UUID)
     // TODO :: add Speed & Cadence sensors
+    // Bluetooth LE Cycling Speed and Cadence Service UUID = 1816
+    //              Speed/Cadence Measurement Char UUID = 2A5B
+    private val CYCLING_SERVICE_UUID = "00001816-0000-1000-8000-00805F9B34FB"
+    private val UUID_CYCLING_SERVICE = UUID.fromString(CYCLING_SERVICE_UUID)
+    private val CYCLING_CHAR_UUID = "00002A5B-0000-1000-8000-00805F9B34FB"
+    private val UUID_CYCLING_CHAR = UUID.fromString(CYCLING_CHAR_UUID)
+    // Bluetooth LE Client Characteristic Configuration Descriptor = 2902
+    private val CCCD_UUID = "00002902-0000-1000-8000-00805F9B34FB"
+    private val UUID_CCCD = UUID.fromString(CCCD_UUID)
 
     private val bleScanner by lazy {
         bluetoothAdapter.bluetoothLeScanner
@@ -126,6 +143,10 @@ class BleService : Service() {
     private val hrmFilter = ScanFilter.Builder().setServiceUuid(
         ParcelUuid.fromString(HEARTRATE_SERVICE_UUID)
     ).build()
+    private val cscFilter = ScanFilter.Builder().setServiceUuid(
+        ParcelUuid.fromString(CYCLING_SERVICE_UUID)
+    ).build()
+    private val bleDeviceFilter = listOf<ScanFilter>(hrmFilter, cscFilter)
 
     private val scanSettings = ScanSettings.Builder()
         .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
@@ -136,6 +157,7 @@ class BleService : Service() {
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
+            Log.i(TAG, "onScanResult")
             val indexQuery = scanResults.indexOfFirst { it.device.address == result.device.address }
             if (indexQuery != -1) { // A scan result already exists with the same address
                 with(result.device) {
@@ -148,33 +170,39 @@ class BleService : Service() {
                 }
                 scanResults.add(result)
             }
-            // TODO :: scan for fixed time? until all three sensors found? other?
-            stopBleScan()
+            // TODO :: timeout? better method to determine all sensors found?
+            if (scanResults.count() == 3) {
+                stopBleScan()
 
-            // connect to each sensor
-            if (scanResults.count() > 0) {
-                // only handling one (HR) sensor at the moment!!
-                with(scanResults[0].device){
-                    Log.i(TAG, "Connecting to $address")
-                    connectGatt(getApplicationContext(), false, gattCallback)
+                // connect to each sensor
+                scanResults.forEach {
+                    // only handling one sensor at the moment!!
+                    with(it.device) {
+                        Log.i(TAG, "Connecting to $address")
+                        connectGatt(getApplicationContext(), false, gattCallback)
+                    }
                 }
-            } else {
-                Log.i(TAG, "no devices to connect")
             }
-
         }
+
+        // TODO :: Error 133 disconnect handle!!! (other disconnects?)
 
         override fun onScanFailed(errorCode: Int) {
             Log.e(TAG, "onScanFailed: code $errorCode")
+//            Log.i(TAG, "(?? it might, but stop/start not run?!??)")
+//            stopBleScan()
+//            startBleScan()
         }
     }
 
     private var isScanning = false
 
     fun startBleScan() {
+        Log.i(TAG, "startBleScan()")
         scanResults.clear()
-        bleScanner.startScan(listOf(hrmFilter), scanSettings, scanCallback)
         isScanning = true
+//        bleScanner.startScan(null, scanSettings, scanCallback)
+        bleScanner.startScan(bleDeviceFilter, scanSettings, scanCallback)
     }
 
     private fun stopBleScan() {
@@ -205,23 +233,26 @@ class BleService : Service() {
         }
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             with(gatt) {
-                Log.w(TAG, "Discovered ${services.size} services for ${device.address}")
-                //printGattTable()
+                Log.w(TAG, "Discovered ${services.size} services for ${device.name.substring(0,3)} (${device.address})")
+//                printGattTable()
 
                 // enable notifications of heart rate measurement
-                val hrServiceUuid = UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb")
-                val hrmCharUuid = UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb")
-                val hrmChar = gatt
-                    .getService(hrServiceUuid)?.getCharacteristic(hrmCharUuid)
-
-                gatt.setCharacteristicNotification(hrmChar, true)
-                val cccDescriptor = hrmChar?.getDescriptor(
-                    UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
-                )
-
-                cccDescriptor?.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
-                gatt.writeDescriptor(cccDescriptor)
-
+                if (device.name.substring(0, 3) == "COO") {
+                    val hrmChar = gatt
+                        .getService(UUID_HEARTRATE_SERVICE)?.getCharacteristic(UUID_HEARTRATE_CHAR)
+                    gatt.setCharacteristicNotification(hrmChar, true)
+                    val cccDescriptor = hrmChar?.getDescriptor(UUID_CCCD)
+                    cccDescriptor?.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
+                    gatt.writeDescriptor(cccDescriptor)
+                } else {
+                    // enable notifications of speed/cadence measurement
+                    val cscChar = gatt
+                        .getService(UUID_CYCLING_SERVICE)?.getCharacteristic(UUID_CYCLING_CHAR)
+                    gatt.setCharacteristicNotification(cscChar, true)
+                    val cccDescriptor = cscChar?.getDescriptor(UUID_CCCD)
+                    cccDescriptor?.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)
+                    gatt.writeDescriptor(cccDescriptor)
+                }
                 // Consider connection setup as complete here
             }
         }
@@ -249,8 +280,10 @@ class BleService : Service() {
             characteristic: BluetoothGattCharacteristic
         ) {
             super.onCharacteristicChanged(gatt, characteristic)
+            val devName = gatt.device.name
+            val devAddr = gatt.device.address
             with(characteristic) {
-                Log.i(TAG, "Characteristic $uuid changed | value: ${value.toHexString()}")
+                Log.i(TAG, "[$devName ($devAddr)] Char $uuid changed | value: ${value.toHexString()}")
             }
             processCharacteristicChange(characteristic)
         }
@@ -298,12 +331,7 @@ class BleService : Service() {
 
     private fun processCharacteristicChange(characteristic: BluetoothGattCharacteristic) {
         var msg: String? = null
-        // This is special handling for the Heart Rate Measurement profile. Data
-        // parsing is
-        // carried out as per profile specifications:
-        // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
-        // https://www.bluetooth.com/wp-content/uploads/Sitecore-Media-Library/Gatt/Xml/Services/org.bluetooth.service.heart_rate.xml
-//        if (UUID_HEART_RATE_MEASUREMENT.equals(characteristic.uuid)) {
+        if (UUID_HEARTRATE_CHAR.equals(characteristic.uuid)) {
             val flag = characteristic.properties
             var format = -1
             if (flag and 0x01 != 0) {
@@ -319,7 +347,41 @@ class BleService : Service() {
             intent.putExtra(EXTRA_HR_RAW_DATA, heartRate)
             LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
             msg = heartRate.toString()
-/*        } else {
+        } else if (UUID_CYCLING_CHAR.equals(characteristic.uuid)) {
+            // get measurement type (0x01 - speed; 0x02 - cadence; 0x03 - BOTH)
+            var cscMeasurement = characteristic.getIntValue(
+                BluetoothGattCharacteristic.FORMAT_UINT8, 0)
+            if (cscMeasurement == 0x01) {
+                // Speed
+                cscMeasurement = characteristic.getIntValue(
+                    BluetoothGattCharacteristic.FORMAT_UINT32, 1)
+                var time = characteristic.getIntValue(
+                    BluetoothGattCharacteristic.FORMAT_UINT16, 5)
+                Log.d(TAG, String.format("Received speed (rev): 0x%x (%d)",
+                    cscMeasurement,cscMeasurement))
+                Log.d(TAG, String.format("                time: 0x%x (%d)",time,time))
+                val intent = Intent(SPD_RAW_BROADCAST)
+                intent.putExtra(EXTRA_SPD_RAW_DATA, cscMeasurement)
+                intent.putExtra(EXTRA_TIME_RAW_DATA, time)
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+            } else if (cscMeasurement == 0x02) {
+                // Cadence
+                cscMeasurement = characteristic.getIntValue(
+                    BluetoothGattCharacteristic.FORMAT_UINT16, 1)
+                var time = characteristic.getIntValue(
+                    BluetoothGattCharacteristic.FORMAT_UINT16, 3)
+                Log.d(TAG, String.format("Received cadence (rev): 0x%x (%d)",
+                    cscMeasurement,cscMeasurement))
+                Log.d(TAG, String.format("                  time: 0x%x (%d)",time,time))
+                val intent = Intent(CAD_RAW_BROADCAST)
+                intent.putExtra(EXTRA_CAD_RAW_DATA, cscMeasurement)
+                intent.putExtra(EXTRA_TIME_RAW_DATA, time)
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+            } else {
+                // Both? Other?
+                Log.e(TAG, String.format("Unknown CSC Measurement type: 0x%x", cscMeasurement))
+            }
+        } else {
             // For all other profiles, writes the data formatted in HEX.
             val data = characteristic.value
             if (data != null && data.size > 0) {
@@ -331,9 +393,9 @@ class BleService : Service() {
                 """.trimIndent()
             }
         }
-       if (mBLEServiceCb != null) {
-            mBLEServiceCb.displayData(msg)
-        } */
+//       if (mBLEServiceCb != null) {
+//            mBLEServiceCb.displayData(msg)
+//        }
     }
 
 }

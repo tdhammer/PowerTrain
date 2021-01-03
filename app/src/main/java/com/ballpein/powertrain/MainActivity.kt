@@ -33,12 +33,17 @@ import androidx.core.content.ContextCompat
 
 
 // TODO !! logcat still shows app as velopower!?!? (android:authorities?)
+// TODO :: start recording data @ START/RESUME, stop @ PAUSE
+// TODO :: save (upload?) data @ SAVE (&& clear!!!)
 // TODO :: record HRM data to "file" (format?)
-// TODO :: connect Speed/Cadence sensors
-// TODO :: report Speed/Cadence data to workout activity
 // TODO :: record Speed/Cadence data to "file" (format?)
+// TODO :: validate Speed (Cadence?)
 // TODO :: calculate/report Power (Watts) data to workout activity
 // TODO :: record Power (Watts) data to "file" (format?)
+// TODO :: strings cleanup
+// TODO :: general cleanup
+// TODO :: tests!!!
+// TODO :: must have sensors ready to connect when app is started...
 // TODO :: sensor connection indicators
 // TODO :: app icon
 // TODO :: HRV test
@@ -67,6 +72,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        // !?!?! onResume was not running so added here,
+        // but then it started running and these were started twice!!
         startService(Intent(this, WorkoutService::class.java))
         startService(Intent(this, BleService::class.java))
     }
@@ -97,14 +104,18 @@ class MainActivity : AppCompatActivity() {
         if (!bluetoothAdapter.isEnabled) {
             promptEnableBluetooth()
         }
-        startService(Intent(this, BleService::class.java))
-        startService(Intent(this, WorkoutService::class.java))
+        // !?!?! onResume was not running so added to onStart,
+        // but then it started running and these were started twice!!
+//        startService(Intent(this, BleService::class.java))
+//        startService(Intent(this, WorkoutService::class.java))
     }
 
     override fun onPause() {
         super.onPause()
-        stopService(Intent(this, BleService::class.java))
-        stopService(Intent(this, WorkoutService::class.java))
+        // !?!?! onPause was not running so did not see this do anything,
+        // but then it started running and these were stopped!!!
+//        stopService(Intent(this, BleService::class.java))
+//        stopService(Intent(this, WorkoutService::class.java))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
